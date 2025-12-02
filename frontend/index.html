@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Tool-Calling Agent</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-robot"></i> MCP Tool-Calling Agent</h1>
+                <p>AI Agent with Multi-Tool Capabilities</p>
+                <div class="status-indicator">
+                    <span id="status-dot" class="status-dot loading"></span>
+                    <span id="status-text">Connecting...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Query Section -->
+            <section class="query-section">
+                <div class="query-container">
+                    <div class="query-header">
+                        <h2><i class="fas fa-comments"></i> Ask the Agent</h2>
+                        <div class="tool-suggestions">
+                            <span>Available capabilities:</span>
+                            <div class="capability-tags">
+                                <span class="tag">Web Search</span>
+                                <span class="tag">Calculations</span>
+                                <span class="tag">Weather</span>
+                                <span class="tag">PDF Analysis</span>
+                                <span class="tag">Q&A</span>
+                                <span class="tag">System Info</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="query-input-container">
+                        <textarea 
+                            id="query-input" 
+                            placeholder="Ask me anything! For example:
+• Search for the latest AI news
+• Calculate 15% of 280
+• What's the weather in London?
+• Summarize this PDF (upload first)
+• What files are in my current directory?"
+                            rows="4"
+                        ></textarea>
+                        <div class="input-actions">
+                            <button id="clear-btn" class="btn btn-secondary">
+                                <i class="fas fa-trash"></i> Clear
+                            </button>
+                            <button id="run-agent-btn" class="btn btn-primary">
+                                <i class="fas fa-play"></i> Run Agent
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Example Queries -->
+                    <div class="example-queries">
+                        <h4>Example queries:</h4>
+                        <div class="examples-grid">
+                            <button class="example-btn" data-query="Search for recent developments in artificial intelligence">
+                                <i class="fas fa-search"></i> Search AI news
+                            </button>
+                            <button class="example-btn" data-query="Calculate the square root of 144 plus 25% of 80">
+                                <i class="fas fa-calculator"></i> Complex calculation
+                            </button>
+                            <button class="example-btn" data-query="What's the weather forecast for New York?">
+                                <i class="fas fa-cloud-sun"></i> Weather forecast
+                            </button>
+                            <button class="example-btn" data-query="List the files in my current directory">
+                                <i class="fas fa-folder"></i> List files
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PDF Upload Section -->
+            <section class="upload-section">
+                <div class="upload-container">
+                    <h3><i class="fas fa-file-pdf"></i> PDF Upload</h3>
+                    <div class="upload-area" id="upload-area">
+                        <div class="upload-content">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <p>Drag & drop a PDF file here, or click to select</p>
+                            <input type="file" id="pdf-input" accept=".pdf" hidden>
+                            <button id="upload-btn" class="btn btn-outline">
+                                <i class="fas fa-plus"></i> Select PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div id="upload-status" class="upload-status"></div>
+                    
+                    <!-- Uploaded Files List -->
+                    <div id="uploaded-files" class="uploaded-files">
+                        <h4>Uploaded Files:</h4>
+                        <div id="files-list" class="files-list">
+                            <!-- Files will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="results-section" style="display: none;">
+                <div class="results-container">
+                    <div class="results-header">
+                        <h2><i class="fas fa-brain"></i> Agent Response</h2>
+                        <div class="execution-info">
+                            <span id="execution-time" class="execution-time"></span>
+                            <span id="tools-used" class="tools-used"></span>
+                        </div>
+                    </div>
+
+                    <!-- Final Answer -->
+                    <div class="answer-section">
+                        <h3><i class="fas fa-comment-dots"></i> Answer</h3>
+                        <div id="final-answer" class="answer-content">
+                            <!-- Agent's final answer will appear here -->
+                        </div>
+                    </div>
+
+                    <!-- Execution Steps -->
+                    <div class="steps-section">
+                        <h3>
+                            <i class="fas fa-list-ol"></i> Execution Steps
+                            <button id="toggle-steps" class="btn btn-small">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </h3>
+                        <div id="steps-content" class="steps-content">
+                            <ol id="steps-list" class="steps-list">
+                                <!-- Steps will be populated here -->
+                            </ol>
+                        </div>
+                    </div>
+
+                    <!-- Tool Outputs -->
+                    <div class="outputs-section">
+                        <h3>
+                            <i class="fas fa-cogs"></i> Tool Outputs
+                            <button id="toggle-outputs" class="btn btn-small">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </h3>
+                        <div id="outputs-content" class="outputs-content" style="display: none;">
+                            <div id="raw-outputs" class="raw-outputs">
+                                <!-- Tool outputs will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay" style="display: none;">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <h3>Agent is processing your request...</h3>
+                <p id="loading-status">Initializing...</p>
+                <div class="loading-steps">
+                    <div class="step" id="step-analyze">
+                        <i class="fas fa-search"></i> Analyzing query
+                    </div>
+                    <div class="step" id="step-select">
+                        <i class="fas fa-tools"></i> Selecting tools
+                    </div>
+                    <div class="step" id="step-execute">
+                        <i class="fas fa-play"></i> Executing tools
+                    </div>
+                    <div class="step" id="step-generate">
+                        <i class="fas fa-brain"></i> Generating answer
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Modal -->
+        <div id="error-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Error</h3>
+                    <button id="close-error" class="close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="error-message"></p>
+                </div>
+                <div class="modal-footer">
+                    <button id="error-ok" class="btn btn-primary">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 MCP Tool-Calling Agent. Built with FastAPI, OpenAI, and modern web technologies.</p>
+            <div class="footer-links">
+                <a href="/docs" target="_blank"><i class="fas fa-book"></i> API Docs</a>
+                <a href="/health" target="_blank"><i class="fas fa-heartbeat"></i> Health Check</a>
+                <a href="https://github.com" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+# Agent Sequence Diagram
+
+```
+User          Frontend        Backend         Agent          LLM           Tools         External APIs
+ │               │               │              │             │              │                │
+ │──query────────►               │              │             │              │                │
+ │               │──POST /agent──►              │             │              │                │
+ │               │               │─process──────►             │              │                │
+ │               │               │              │─analyze─────►              │                │
+ │               │               │              │             │              │                │
+ │               │               │              │◄─tools─────┘              │                │
+ │               │               │              │                            │                │
+ │               │               │              │─validate────────────────────►                │
+ │               │               │              │◄─validated──────────────────┘                │
+ │               │               │              │                            │                │
+ │               │               │              │─execute─────────────────────►                │
+ │               │               │              │             │              │──API call─────►│
+ │               │               │              │             │              │◄─response─────┘│
+ │               │               │              │◄─result─────────────────────┘                │
+ │               │               │              │                            │                │
+ │               │               │              │─generate────►              │                │
+ │               │               │              │◄─answer─────┘              │                │
+ │               │               │              │                            │                │
+ │               │               │◄─response────┘             │              │                │
+ │               │◄─JSON─────────┘              │             │              │                │
+ │◄─display──────┘               │              │             │              │                │
+
+DETAILED STEPS:
+
+1. User Input
+   - User types query in frontend
+   - Frontend validates input
+   - POST request sent to /agent endpoint
+
+2. Backend Processing  
+   - FastAPI receives request
+   - Request routed to agent.process_query()
+   - Agent initializes response structure
+
+3. LLM Analysis
+   - Query analyzed by LLM interface
+   - Tool selection logic executed
+   - Returns list of tools with arguments
+
+4. Tool Validation
+   - Tool Manager validates each tool call
+   - Checks required parameters
+   - Verifies tool availability
+
+5. Tool Execution (for each selected tool)
+   - Tool Manager executes tool
+   - Tool makes external API calls if needed
+   - Results collected and formatted
+   - Retry logic applied for failures
+
+6. Answer Generation
+   - All tool results aggregated
+   - LLM generates final answer
+   - Fallback logic if LLM unavailable
+
+7. Response Assembly
+   - Structured response created
+   - Execution steps logged
+   - Raw tool outputs included
+   - Performance metrics added
+
+8. Frontend Display
+   - JSON response processed
+   - Results displayed in sections
+   - Interactive elements enabled
+   - Error handling for failures
+```
